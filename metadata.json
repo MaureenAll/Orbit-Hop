@@ -1,6 +1,6 @@
 {
-  "name": "",
-  "description": "",
+  "name": "Orbit Hop",
+  "description": "Arcade orbital survival game dodging space debris with real-time telemetry, procedural synth audio, and customizable satellites.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

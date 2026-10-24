@@ -1,37 +1,42 @@
-# Satellite Dodger
+# Orbit Hop
 
-Satellite Dodger is an arcade orbital survival game built for web and mobile browsers. Players pilot an orbital satellite through low-Earth orbit, dodging space debris, spent booster stages, and micrometeoroid clouds while balancing altitude against atmospheric burn-up and orbital escape.
+Orbit Hop is a high-speed arcade orbital survival game built for web, mobile browsers, and app store deployment. Players navigate an orbital satellite through low-Earth orbit, dodging space debris, defunct satellites, and booster stages while balancing altitude against atmospheric burn-up and deep space drift.
 
 ***
 
 ## User Review & Critical Decisions
 
 > [!IMPORTANT]
-> The following core design decisions were confirmed during initial clarification and form the foundation of the build:
+> The following revisions have been incorporated based on your feedback:
 
-- **Confirmed: Dual-Mode Thrust Controls**: Seamless in-game toggle between **Hold-Thrust** (continuous propulsion with gravitational drop on release) and **Tap-Pulse** (discrete agile hops). Both keyboard (`Space`/`ArrowUp`/`W`) and full-screen touch/mouse input supported.
-- **Confirmed: Vector Arcade Retro Aesthetic**: Glowing vector line-work, vibrant thruster particle trails, orbital debris sparks, curved Earth horizon glow, and smooth day-to-night orbital lighting transitions.
-- **Confirmed: Orbit Telemetry HUD**: Real-time altitude readout ($300\text{--}650\text{ km}$ Low Earth Orbit band), orbital velocity ($27,000+\text{ km/h}$), distance counter, dodge streak multiplier, and atmospheric re-entry warning bar.
-- **Confirmed: Procedural Web Audio Synth**: Synthesized retro space audio via Web Audio API—smooth pitch-modulating thruster drone, 1,000 km milestone electronic chimes, near-miss pulse sweeps, explosion crunch, and mute toggle. Zero external MP3 asset dependency.
-- **Confirmed: Unlockable Satellite Chassis**: Hangar system with unlockable satellite models (CubeSat Mk I, Sputnik V, Helios Solar Sailer, Vanguard Relay, and Aegis Orbital Station) earned via distance milestones.
-- **Confirmed: Algorithmic Fairness Guarantee**: Obstacle spawner calculates required vertical transit time based on satellite velocity and thrust parameters to guarantee that every gap and debris field is passably traversable.
+- **Branding Update**: App and game officially named **Orbit Hop** (Short name: `OrbitHop`).
+- **Store-Ready Mobile Architecture**:
+  - **100% Offline Progressive Web App (PWA)**: Implemented with `vite-plugin-pwa`, complete Web App Manifest, offline caching, and responsive service worker.
+  - **In-App Install Prompt**: Dedicated "Install Orbit Hop" button on the title screen and pause menu supporting native Android/Chrome install prompts and iOS Safari "Add to Home Screen" guidance.
+  - **Turnkey Store Publishing**: Standard architecture compatible directly with **PWABuilder** or **Bubblewrap** for generating Google Play `.aab` Android App Bundles (Trusted Web Activity) and **Capacitor** for native iOS / Android Xcode and Android Studio projects.
+  - **Touch & Mobile Ergonomics**: `touch-action: none`, full-screen touch zone with zero input lag, notch safe-area padding (`env(safe-area-inset-top)`), and subtle haptic pulse feedback (`navigator.vibrate`) on near-misses and collisions.
+- **Dual-Mode Thrust Controls**: Instant toggle between **Hold-Thrust** (continuous burn with gravitational drop) and **Tap-Pulse** (rhythmic discrete hops).
+- **Vector Arcade Retro Aesthetic**: Glowing neon vector lines, thruster plasma trails, orbital debris sparks, and smooth day-to-night orbital lighting transitions.
+- **Orbit Telemetry HUD**: Monospace tabular readouts for altitude ($300\text{--}650\text{ km}$), orbital velocity ($27,000+\text{ km/h}$), distance traveled, and streak multiplier.
+- **Procedural Web Audio Engine**: Zero-asset procedural synth oscillators for thruster hum, 1,000 km electronic chimes, near-miss adrenaline sweeps, and impact crunch.
+- **Algorithmic Fairness Guarantee**: Spawner calculates maximum vertical transit time based on satellite velocity to guarantee 100% passable corridors and safe gap clearances ($\ge 140\text{px}$).
 
 ***
 
 ## 1. Overview & Core Concept
 
-- **What It Does**: Puts the player in command of an operational satellite in an increasingly congested orbital corridor. Players maneuver vertically to evade derelict spacecraft fragments, solar panels, and asteroid fragments while maintaining safe orbital altitude.
-- **Target Audience & Platform**: Casual gamers, retro arcade fans, and mobile/desktop browser players seeking rapid, satisfying "one more run" gameplay. Designed mobile-first with touch surface responsiveness and desktop keyboard refinement.
-- **Key Value**: Instant zero-friction playability, responsive physics movement, visceral visual feedback with screen shake and particle bursts, and persistent progression.
+- **What It Does**: Fast-paced mobile-first arcade runner where players hop and thrust through orbital debris bands. The satellite maintains orbital velocity while dodging defunct satellites, booster cores, and micrometeoroids.
+- **Target Audience & Platform**: Mobile and desktop gamers, indie game fans. Built to play instantaneously in any mobile browser or as an installed standalone app from Google Play / Apple App Store.
+- **Key Value**: One-tap learning curve, deep mastery ceiling, instantaneous restarts, and offline play anywhere.
 
 ***
 
-## 2. User Experience & Visual Design
+## 2. Mobile & Visual Experience Design
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
 │  ALTITUDE: 420 KM   ·   VELOCITY: 27,800 KM/H   ·   DISTANCE: 3,420 KM │
-│  MODE: [HOLD-THRUST]                                [🔊 SOUND: ON]     │
+│  MODE: [HOLD-THRUST]                [📱 INSTALL APP]  [🔊 SOUND: ON]   │
 ├────────────────────────────────────────────────────────────────────────┤
 │                                                                        │
 │        ✦       *        .       *          ✦                           │
@@ -48,56 +53,44 @@ Satellite Dodger is an arcade orbital survival game built for web and mobile bro
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
-### Key User Flows
+### Mobile & Store Adaptation
 
-1. **Title Screen & Live Hangar**:
-   - Atmospheric vector Earth horizon gently rotating in the background with day/night orbital lighting.
-   - High score display, distance milestone badges, and quick Satellite Hangar preview.
-   - Primary **"Launch Mission"** action (`Space` / Tap to start).
-   - Control mode selector: `Hold to Thrust` vs `Tap to Hop`.
+1. **Touch Ergonomics & Viewport**:
+   - Entire screen acts as the responsive thrust/hop touch surface.
+   - Screen edges respect mobile hardware gestures and notch safe-areas (`pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]`).
+   - Default pull-to-refresh and pinch-zoom disabled on the canvas via `touch-action: none` and `overscroll-behavior: none`.
 
-2. **Active Orbit (Gameplay)**:
-   - Full-viewport isolated HTML5 `<canvas>` running at 60 FPS.
-   - Smooth vertical physics: upward thruster acceleration, gravitational decay, and inertial momentum.
-   - Top and bottom boundaries: upper boundary triggers ionospheric ceiling warning; lower boundary dips into dense atmosphere with re-entry heat friction particles.
-   - Dynamic Day/Night Cycle: transitions smoothly every 2,000 km between sunlit solar panel gleam and dark Earth eclipse with radiant city lights below and vibrant distant stars.
-   - Real-time Orbit Telemetry HUD styled with uncluttered vector monospace readouts.
-   - Milestone Celebrations: every 1,000 km triggers a visual horizon surge and harmonious electronic chime.
+2. **In-App PWA Installation**:
+   - Detects `beforeinstallprompt` on Android / Chrome desktop to offer a 1-tap "Install Orbit Hop" button.
+   - Provides iOS Safari modal explaining "Share → Add to Home Screen" for zero-friction mobile deployment.
+   - Automatically hides install prompts once running in `standalone` display mode.
 
-3. **Game Over & Debrief**:
-   - Immediate impact freeze-frame (40ms hitstop) followed by vector debris fragmentation and screen shake.
-   - Mission debrief card: Final Distance, New Personal Best callout, Close Dodges, Streak Multiplier, and unlocked satellite achievements.
-   - Single-tap **"Relaunch Immediately"** button (`Space` / Enter / Tap) with zero delay.
+3. **Store Packaging Readiness**:
+   - Generates compliant `manifest.json` with 192x192, 512x512 icons, and maskable safe-zone icon.
+   - Enables export to Google Play Store via PWABuilder / TWA CLI or iOS via Capacitor.
 
-### Visual Identity & Theme Tokens
-
-- **Aesthetic Direction**: Neo-Vector Sci-Fi Arcade (inspired by Asteroids, Geometry Wars, and modern aerospace telemetry).
-- **Color Palette**:
-  - Deep Space Void: `#050814` to `#0a0f24`
-  - Atmospheric Horizon Arc: `#1e3a8a` to `#0284c7` (day) / `#0f172a` to `#1e1b4b` (night)
-  - Neon Thruster Ion Cyan: `#22d3ee`
-  - Solar Array Gold: `#facc15`
-  - Hazard Amber & Debris Crimson: `#f59e0b` / `#ef4444`
-  - Radar HUD Text: `#94a3b8` / `#f8fafc`
-- **Typography**: Clean display headline pairing with monospace tabular figures (`font-mono tabular-nums`) for high-precision telemetry metrics.
+4. **Visual Polish & Game Feel**:
+   - Deep void background (`#050814`) with starfield parallax.
+   - Earth curvature with dynamic day/night terminator line cycling every 2,000 km.
+   - Neon cyan ion thruster trail, gold solar panels, and amber/red debris warnings.
+   - Micro-haptics (`navigator.vibrate`) for tactile feedback on mobile devices.
 
 ***
 
-## 3. Key Product Decisions & Trade-Offs
+## 3. Key Technical Decisions & Trade-Offs
 
-- **Decision 1: Direct 60 FPS HTML5 Canvas Engine over Heavy Frameworks**
-  - *Chosen Approach*: Lightweight dedicated Canvas 2D render loop decoupled from React state renders.
-  - *Why*: Sub-millisecond touch/input responsiveness, zero framework bloat, flawless 60 FPS performance on both mobile phones and desktop browsers.
-  - *Alternatives Considered*: Phaser 3 or Godot WASM. Canvas 2D provides instant loading, zero external bundle overhead, and seamless React UI integration.
-- **Decision 2: Procedural Web Audio API Synthesizer**
-  - *Chosen Approach*: Pure JavaScript Web Audio oscillator and biquad filter nodes for thruster drone, debris near-miss sweeps, milestone bells, and collision explosions.
-  - *Why*: Immune to network latency or missing MP3 file errors, dynamic real-time pitch shifting as satellite speed ramps up, tiny memory footprint.
-- **Decision 3: Guaranteed Passable Procedural Spawning**
-  - *Chosen Approach*: Spawner algorithm analyzes the satellite's maximum vertical thrust velocity and terminal falling speed against oncoming scrolling velocity, maintaining a guaranteed minimum clearance gap ($\ge 140\text{px}$) with safe reaction corridors.
-  - *Why*: Eliminates unavoidable "cheap deaths", rewarding player skill and reflexes.
-- **Decision 4: Local Storage Persistence**
-  - *Chosen Approach*: Stores high score distance, lifetime distance traveled, unlocked satellite skins, preferred control mode, and audio settings in `localStorage`.
-  - *Why*: Instant offline-ready persistence without login walls or server bottlenecks.
+- **Decision 1: Direct 60 FPS HTML5 Canvas Engine**
+  - *Chosen Approach*: Single decoupled `<canvas>` rendering loop with fixed delta time clamping (`Math.min(dt, 0.05)`).
+  - *Why*: Guarantees rock-solid 60 FPS on low-power mobile phones, eliminating React re-render overhead.
+- **Decision 2: Turnkey PWA + Store Compatibility**
+  - *Chosen Approach*: `vite-plugin-pwa` with auto-updating Service Worker and asset precaching.
+  - *Why*: Allows instant offline gameplay without any network connection, and enables 1-click generation of native app store packages (Google Play `.aab` and iOS Xcode project) using standard packaging tools.
+- **Decision 3: Procedural Web Audio API Synth**
+  - *Chosen Approach*: Real-time audio synthesis with Web Audio oscillators and filters.
+  - *Why*: Zero MP3 downloads, sub-millisecond playback trigger, pitch-bending thruster modulation, and no audio latency on mobile.
+- **Decision 4: Algorithmic Fair Spawning**
+  - *Chosen Approach*: Spawner dynamically checks current satellite speed, gravity, and thrust acceleration to guarantee vertical corridors are strictly passable.
+  - *Why*: Eliminates unwinnable RNG choke points, fostering fair competitive replayability.
 
 ***
 
@@ -105,66 +98,34 @@ Satellite Dodger is an arcade orbital survival game built for web and mobile bro
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
-│                             App Container                              │
+│                        Orbit Hop Mobile Web Shell                      │
 ├────────────────────────────────┬───────────────────────────────────────┤
 │         React UI Shell         │         Canvas Game Engine            │
-│  - State Machine Driver        │  - 60 FPS Fixed Delta Loop (0.016s)   │
-│  - Telemetry HUD & Overlays    │  - Physics Engine (Thrust/Gravity)    │
-│  - Satellite Hangar Modal      │  - Procedural Fair Spawner            │
-│  - Audio & Control Settings    │  - Collision Detection (AABB/Circles) │
-│  - LocalStorage Synchronization│  - Particle System (Thruster & Sparks)│
+│  - State Machine Driver        │  - 60 FPS Fixed Delta Loop            │
+│  - Telemetry HUD & Overlays    │  - Physics & Velocity Clamping        │
+│  - PWA Install Prompts (iOS/And│  - Guaranteed Fair Procedural Spawner │
+│  - Satellite Hangar Modal      │  - Particle System & Screen Shake     │
+│  - LocalStorage Synchronization│  - Touch / Keyboard Event Stream      │
 ├────────────────────────────────┴───────────────────────────────────────┤
-│                     Procedural Web Audio Engine                        │
-│  - Dynamic Thruster Noise/Tone  ·  Chimes  ·  Near-Miss Pulse  · Crash │
+│              Audio & Device APIs (Web Audio Synth + Haptics)           │
+├────────────────────────────────────────────────────────────────────────┤
+│                 Service Worker (PWA Offline Precaching)                │
 └────────────────────────────────────────────────────────────────────────┘
-```
-
-### Component Hierarchy
-
-```
-App.tsx
-├── CanvasViewport (Isolated Canvas ref, 60fps loop, Touch & Keyboard handlers)
-├── GameHUD (Distance, Altitude, Velocity, Streak, Sound Toggle, Mode Switch)
-├── TitleScreenOverlay (Logo lockup, High Score, Hangar trigger, Launch CTA)
-├── HangarModal (Satellite skin selector, stats, unlocks)
-├── GameOverOverlay (Mission distance, Personal Best indicator, Instant Retry)
-└── PauseModal (Controls reminder, audio volume, resume)
 ```
 
 ### Data Model & State
 
 ```typescript
-interface PlayerSatellite {
-  x: number;
-  y: number;
-  vy: number;
-  rotation: number;
-  thrusting: boolean;
-  skinId: string;
-  shieldActive: boolean;
-}
+type GameState = 'TITLE' | 'PLAYING' | 'PAUSED' | 'GAME_OVER';
 
-interface Obstacle {
-  id: number;
-  type: 'debris_small' | 'debris_medium' | 'booster_core' | 'defunct_sat' | 'hazard_wall';
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-  rotation: number;
-  rotationSpeed: number;
-  radius: number;
-  gapY?: number; // For hazard walls
-  gapHeight?: number;
-}
-
-interface GameProgress {
+interface OrbitHopProgress {
   highScoreKm: number;
   lifetimeKm: number;
   selectedSkin: string;
   unlockedSkins: string[];
   controlMode: 'hold' | 'pulse';
   soundEnabled: boolean;
+  hapticsEnabled: boolean;
 }
 ```
 
@@ -172,4 +133,4 @@ interface GameProgress {
 
 ## 5. Next Steps
 
-Upon your approval, we will immediately implement the full Satellite Dodger game with responsive physics, vector graphics, procedural audio, hangar unlocks, and guaranteed fair obstacle generation.
+Upon your approval, we will immediately execute the complete build of **Orbit Hop**, including the game engine, vector graphics, telemetry HUD, procedural synth, PWA installation, and mobile store packaging assets.

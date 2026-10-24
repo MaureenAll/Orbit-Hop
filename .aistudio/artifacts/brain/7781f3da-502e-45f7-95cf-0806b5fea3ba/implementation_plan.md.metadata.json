@@ -1,6 +1,6 @@
 {
-  "summary":  "Implementation plan for Satellite Dodger, a high-performance vector arcade orbital survival game featuring dual-mode thrust controls, dynamic day/night orbit cycles, procedural Web Audio synth sound effects, telemetry HUD, unlockable satellite skins, and mathematically fair obstacle generation.",
-  "updatedAt":  "2026-10-24T15:04:55.480203297Z",
+  "summary":  "Revised implementation plan for Orbit Hop, updating branding from Satellite Dodger to Orbit Hop, and incorporating full mobile PWA architecture, in-app installation, touch-optimized safe-area controls, haptics, and turnkey store publishing pathway (PWABuilder / TWA / Capacitor) for Google Play and the Apple App Store.",
+  "updatedAt":  "2026-10-24T15:08:22.817731010Z",
   "requestFeedback":  true,
   "userFacing":  true
 }
